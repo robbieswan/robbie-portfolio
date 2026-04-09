@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-cream: #FAFAF7;
+  --color-ink: #1A1A18;
+  --color-ink-light: #3D3D38;
+  --color-muted: #888880;
+  --color-accent: #2563EB;
+  --color-glass: rgba(255, 255, 255, 0.72);
+  --color-glass-border: rgba(255, 255, 255, 0.55);
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Fraunces', serif;
+}
+
+:root {
+  --cream: #FAFAF7;
+  --ink: #1A1A18;
+  --ink-light: #3D3D38;
+  --muted: #888880;
+  --accent: #2563EB;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.55);
+  --radius: 20px;
+  --radius-sm: 12px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  overflow-x: hidden;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mesh gradient background */
+.mesh-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 20%, rgba(219,234,254,0.92) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 10%, rgba(254,215,170,0.65) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 70% 80%, rgba(233,213,255,0.55) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 30% 85%, rgba(187,247,208,0.45) 0%, transparent 50%),
+    #FAFAF7;
+}
+
+/* Grain overlay */
+.grain-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.grain-canvas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Vinyl spin */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Card float */
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0) rotate(1.5deg); }
+  50% { transform: translateY(-14px) rotate(1.5deg); }
+}
+
+/* Orb pulse */
+@keyframes orbpulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+/* Pulsing dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
