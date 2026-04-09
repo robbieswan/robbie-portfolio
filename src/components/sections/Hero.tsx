@@ -4,6 +4,10 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 
 export default function Hero() {
+  const openEmail = () => {
+    window.open('mailto:robbie.swanson2@gmail.com?subject=Hey%20Robbie!', '_self')
+  }
+
   return (
     <section id="hero">
       <div className="hero-grid">
@@ -28,8 +32,8 @@ export default function Hero() {
           {/* Description */}
           <p className="hero-desc">
             I turn ML into products people actually use. From building the music industry&apos;s
-            first safety streaming platform to launching an AI voice app in 3 weeks — I ship fast,
-            own outcomes, and obsess over the user.
+            first safety streaming platform to launching multiple AI products into consumer
+            products serving 200K+ users.
           </p>
 
           {/* CTAs */}
@@ -44,13 +48,14 @@ export default function Hero() {
                 <path d="M7 17L17 7M17 7H7M17 7v10" />
               </svg>
             </motion.a>
-            <motion.a
-              href="mailto:robbie.swanson2@gmail.com"
+            <motion.button
               className="btn-secondary"
               whileHover={{ y: -2 }}
+              onClick={openEmail}
+              type="button"
             >
               Say hello →
-            </motion.a>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -77,7 +82,7 @@ export default function Hero() {
             <div className="badge-name">Robbie Swanson</div>
             <div className="badge-role">Senior PM · ML Engineer · Lehi, UT</div>
             <div className="badge-chips">
-              {['AI/ML', 'Mobile', 'Fintech'].map((chip) => (
+              {['AI/ML', 'Consumer Products', 'Music Tech', 'Fintech'].map((chip) => (
                 <span key={chip} className="badge-chip">{chip}</span>
               ))}
             </div>
@@ -170,6 +175,8 @@ export default function Hero() {
           text-decoration: none;
           border: 2px solid rgba(0,0,0,0.12);
           transition: all 0.25s ease;
+          cursor: pointer;
+          font-family: inherit;
         }
         .btn-secondary:hover {
           border-color: var(--ink);

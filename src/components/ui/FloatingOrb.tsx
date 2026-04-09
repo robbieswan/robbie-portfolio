@@ -3,11 +3,16 @@
 import Image from 'next/image'
 
 export default function FloatingOrb() {
+  const handleClick = () => {
+    window.open('mailto:robbie.swanson2@gmail.com?subject=Hey%20Robbie!', '_self')
+  }
+
   return (
     <div
-      onClick={() => {
-        window.location.href = 'mailto:robbie.swanson2@gmail.com?subject=Hey Robbie!'
-      }}
+      onClick={handleClick}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter') handleClick() }}
       style={{
         position: 'fixed',
         bottom: '30px',
@@ -40,7 +45,7 @@ export default function FloatingOrb() {
         {/* Photo */}
         <Image
           src="/images/profile.jpg"
-          alt="Chat with Robbie"
+          alt="Contact Robbie"
           width={62}
           height={62}
           style={{
@@ -88,7 +93,7 @@ export default function FloatingOrb() {
           transition: 'all 0.3s ease',
         }}
       >
-        Ask me anything 👋
+        Say hello 👋
         <div
           style={{
             position: 'absolute',

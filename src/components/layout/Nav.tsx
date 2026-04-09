@@ -36,9 +36,12 @@ export default function Nav() {
             <li><a href="#experience">Experience</a></li>
             <li><a href="#vinyl">Music</a></li>
             <li>
-              <a href="mailto:robbie.swanson2@gmail.com" className="nav-cta">
+              <button
+                onClick={() => window.open('mailto:robbie.swanson2@gmail.com?subject=Hey%20Robbie!', '_self')}
+                className="nav-cta"
+              >
                 Say hello
-              </a>
+              </button>
             </li>
           </ul>
 
@@ -63,13 +66,12 @@ export default function Nav() {
             <a href="#projects" onClick={() => setMenuOpen(false)}>Work</a>
             <a href="#experience" onClick={() => setMenuOpen(false)}>Experience</a>
             <a href="#vinyl" onClick={() => setMenuOpen(false)}>Music</a>
-            <a
-              href="mailto:robbie.swanson2@gmail.com"
-              onClick={() => setMenuOpen(false)}
+            <button
+              onClick={() => { setMenuOpen(false); window.open('mailto:robbie.swanson2@gmail.com?subject=Hey%20Robbie!', '_self') }}
               className="mobile-cta"
             >
               Say hello
-            </a>
+            </button>
           </div>
         </div>
       )}

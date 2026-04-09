@@ -61,16 +61,17 @@ export default function VinylPlayer() {
               </em>
             </h2>
             <p style={{ fontSize: '15px', lineHeight: 1.75, color: 'var(--muted)', marginBottom: '12px' }}>
-              When I joined Gabb, I inherited a product not living up to its safety promise. So I
-              architected the music industry&apos;s first true ML filtering platform — from scratch.
+              When I joined Gabb, I inherited a product that wasn&apos;t advanced enough to scale
+              and filter well enough to make the product truly safe and scalable for families. So I
+              helped build the music industry&apos;s first true ML filtering platform that kids love and parents trust.
             </p>
             <p style={{ fontSize: '15px', lineHeight: 1.75, color: 'var(--muted)', marginBottom: '12px' }}>
-              1.8 million tracks. 70,000+ album images classified. 99.9% accuracy. The result became
+              Millions of tracks. 70,000+ album images classified. 99.9% accuracy. The result became
               the #1 reason families upgraded their plan.
             </p>
-            <p style={{ marginTop: '20px', fontSize: '14px', fontWeight: 700, color: 'var(--ink)' }}>
-              Currently spinning on Gabb Music+
-            </p>
+            <a href="#vinyl-player" style={{ marginTop: '20px', fontSize: '14px', fontWeight: 700, color: 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+              Listen to the tracks that describe me ↓
+            </a>
           </motion.div>
 
           {/* Player */}
@@ -153,7 +154,7 @@ export default function VinylPlayer() {
                   height: '140px',
                   transformOrigin: '70px 14px',
                   transition: 'transform 0.9s cubic-bezier(0.34, 1.2, 0.64, 1)',
-                  transform: isPlaying ? 'rotate(-18deg)' : 'rotate(-35deg)',
+                  transform: isPlaying ? 'rotate(-5deg)' : 'rotate(-35deg)',
                 }}
               >
                 {/* Pivot */}
