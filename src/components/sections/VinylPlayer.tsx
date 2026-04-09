@@ -1,43 +1,96 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 const TRACKS = [
-  'Why I Left ML for Product',
-  'The 3am Mixpanel Bug',
-  'Ship It or Regret It',
-  'Hot Takes on AI Hype',
+  { title: 'Apparitions', subtitle: 'My Philosophy on Product', src: '/audio/apparitions.mp3', gradient: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)' },
+  { title: 'Troubled Times', subtitle: 'An Intro to Robbie', src: '/audio/troubled-times.mp3', gradient: 'linear-gradient(135deg, #F97316 0%, #EC4899 100%)' },
 ]
 
 export default function VinylPlayer() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTrack, setCurrentTrack] = useState(0)
   const [progress, setProgress] = useState(0)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  // Initialize audio on mount
+  useEffect(() => {
+    audioRef.current = new Audio(TRACKS[0].src)
+    audioRef.current.preload = 'metadata'
+    return () => {
+      audioRef.current?.pause()
+      audioRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Sync progress with audio currentTime
+  useEffect(() => {
+    if (!isPlaying || !audioRef.current) return
+    const interval = setInterval(() => {
+      const audio = audioRef.current
+      if (audio && audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100)
+      }
+    }, 200)
+    return () => clearInterval(interval)
+  }, [isPlaying])
+
+  // Handle track end → next track
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const handleEnded = () => {
+      setCurrentTrack((prev) => (prev + 1) % TRACKS.length)
+    }
+    audio.addEventListener('ended', handleEnded)
+    return () => audio.removeEventListener('ended', handleEnded)
+  }, [])
+
+  // When currentTrack changes, load and play the new track
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    const wasPlaying = isPlaying
+    audio.src = TRACKS[currentTrack].src
+    audio.load()
+    setProgress(0)
+    if (wasPlaying) {
+      audio.play().catch(() => {})
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrack])
+
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (isPlaying) {
+      audio.pause()
+      setIsPlaying(false)
+    } else {
+      audio.play().then(() => setIsPlaying(true)).catch(() => {})
+    }
+  }, [isPlaying])
 
   const nextTrack = useCallback(() => {
     setCurrentTrack((prev) => (prev + 1) % TRACKS.length)
-    setProgress(0)
   }, [])
 
   const prevTrack = useCallback(() => {
     setCurrentTrack((prev) => (prev - 1 + TRACKS.length) % TRACKS.length)
-    setProgress(0)
   }, [])
 
-  useEffect(() => {
-    if (!isPlaying) return
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          nextTrack()
-          return 0
-        }
-        return prev + 0.14
-      })
-    }, 100)
-    return () => clearInterval(interval)
-  }, [isPlaying, nextTrack])
+  const seekTo = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current
+    if (!audio || !audio.duration) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const pct = (e.clientX - rect.left) / rect.width
+    audio.currentTime = pct * audio.duration
+    setProgress(pct * 100)
+  }, [])
+
+  const track = TRACKS[currentTrack]
 
   return (
     <section id="vinyl" style={{ padding: '100px 0', background: 'rgba(0,0,0,0.02)' }}>
@@ -76,6 +129,7 @@ export default function VinylPlayer() {
 
           {/* Player */}
           <motion.div
+            id="vinyl-player"
             initial={{ opacity: 0, y: 28 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -93,18 +147,10 @@ export default function VinylPlayer() {
                   boxShadow: '0 0 0 2px #333, 0 30px 80px rgba(0,0,0,0.45)',
                   position: 'relative',
                   animation: isPlaying ? 'spin 4s linear infinite' : 'none',
-                  transition: 'box-shadow 0.5s',
                 }}
               >
                 {/* Grooves */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    inset: '16px',
-                    borderRadius: '50%',
-                    background: 'repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 5px, rgba(255,255,255,0.025) 5px, rgba(255,255,255,0.025) 6px)',
-                  }}
-                />
+                <div style={{ position: 'absolute', inset: '16px', borderRadius: '50%', background: 'repeating-radial-gradient(circle at 50% 50%, transparent 0, transparent 5px, rgba(255,255,255,0.025) 5px, rgba(255,255,255,0.025) 6px)' }} />
                 {/* Label with curved text */}
                 <div
                   style={{
@@ -115,16 +161,16 @@ export default function VinylPlayer() {
                     width: '96px',
                     height: '96px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)',
+                    background: track.gradient,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     boxShadow: '0 4px 24px rgba(37,99,235,0.5)',
                     overflow: 'hidden',
+                    transition: 'background 0.6s ease',
                   }}
                 >
-                  {/* Curved "GABB MUSIC" text around top */}
                   <svg width="96" height="96" viewBox="0 0 96 96" style={{ position: 'absolute', inset: 0 }}>
                     <defs>
                       <path id="topArc" d="M 48,48 m -33,0 a 33,33 0 1,1 66,0" />
@@ -157,77 +203,68 @@ export default function VinylPlayer() {
                   transform: isPlaying ? 'rotate(-5deg)' : 'rotate(-35deg)',
                 }}
               >
-                {/* Pivot */}
                 <div style={{ position: 'absolute', top: '6px', right: '8px', width: '16px', height: '16px', borderRadius: '50%', background: 'linear-gradient(135deg, #ccc, #777)', border: '1px solid #999', zIndex: 2 }} />
-                {/* Shaft */}
                 <div style={{ position: 'absolute', top: '12px', right: '14px', width: '5px', height: '110px', background: 'linear-gradient(180deg, #aaa 0%, #666 100%)', borderRadius: '3px', transformOrigin: 'center 6px', transform: 'rotate(-12deg)' }}>
-                  {/* Head / cartridge */}
                   <div style={{ position: 'absolute', bottom: '-2px', left: '-4px', width: '14px', height: '8px', background: '#444', borderRadius: '2px' }} />
                 </div>
               </div>
             </div>
 
-            {/* Controls */}
-            <div
-              style={{
-                width: '100%',
-                maxWidth: '300px',
-                margin: '0 auto',
-                background: 'rgba(255,255,255,0.85)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '18px',
-                padding: '18px 22px',
-                border: '1px solid rgba(255,255,255,0.95)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-              }}
-            >
+            {/* Controls card */}
+            <div style={{ width: '100%', maxWidth: '300px', margin: '0 auto', background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', borderRadius: '18px', padding: '18px 22px', border: '1px solid rgba(255,255,255,0.95)', boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
               {/* Now playing */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: 'linear-gradient(135deg, #2563EB, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '10px', background: track.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0, transition: 'background 0.6s ease' }}>
                   🎵
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {TRACKS[currentTrack]}
+                    {track.title}
                   </div>
                   <div style={{ fontSize: '11px', color: 'var(--muted)', fontWeight: 500 }}>
-                    Robbie Swanson · Portfolio
+                    {track.subtitle}
                   </div>
                 </div>
               </div>
 
-              {/* Progress */}
-              <div
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect()
-                  const pct = ((e.clientX - rect.left) / rect.width) * 100
-                  setProgress(pct)
-                }}
-                style={{ height: '3px', background: 'rgba(0,0,0,0.08)', borderRadius: '3px', marginBottom: '14px', cursor: 'pointer', overflow: 'hidden' }}
-              >
-                <div style={{ height: '100%', background: 'linear-gradient(90deg, #2563EB, #7C3AED)', borderRadius: '3px', width: `${progress}%`, transition: 'width 0.1s linear' }} />
+              {/* Progress bar */}
+              <div onClick={seekTo} style={{ height: '3px', background: 'rgba(0,0,0,0.08)', borderRadius: '3px', marginBottom: '14px', cursor: 'pointer', overflow: 'hidden' }}>
+                <div style={{ height: '100%', background: track.gradient, borderRadius: '3px', width: `${Math.min(progress, 100)}%`, transition: 'width 0.2s linear, background 0.6s ease' }} />
               </div>
 
-              {/* Buttons */}
+              {/* Controls */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '18px' }}>
-                <button onClick={prevTrack} style={ctrlStyle}>⏮</button>
+                {/* Prev */}
+                <button onClick={prevTrack} className="ctrl-btn" aria-label="Previous track">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+                  </svg>
+                </button>
+
+                {/* Play/Pause */}
                 <motion.button
-                  onClick={() => setIsPlaying(!isPlaying)}
+                  onClick={togglePlay}
                   whileHover={{ scale: 1.08 }}
-                  style={{
-                    ...ctrlStyle,
-                    width: '50px',
-                    height: '50px',
-                    background: 'var(--ink)',
-                    color: 'white',
-                    fontSize: '17px',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--accent)' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--ink)' }}
+                  className="ctrl-btn ctrl-play"
+                  aria-label={isPlaying ? 'Pause' : 'Play'}
                 >
-                  {isPlaying ? '⏸' : '▶'}
+                  {isPlaying ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
                 </motion.button>
-                <button onClick={nextTrack} style={ctrlStyle}>⏭</button>
+
+                {/* Next */}
+                <button onClick={nextTrack} className="ctrl-btn" aria-label="Next track">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                  </svg>
+                </button>
               </div>
             </div>
           </motion.div>
@@ -235,6 +272,29 @@ export default function VinylPlayer() {
       </div>
 
       <style>{`
+        .ctrl-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: var(--muted);
+          width: 34px;
+          height: 34px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s;
+          padding: 0;
+        }
+        .ctrl-btn:hover { color: var(--ink); background: rgba(0,0,0,0.05); }
+        .ctrl-play {
+          width: 50px !important;
+          height: 50px !important;
+          background: var(--ink) !important;
+          color: white !important;
+        }
+        .ctrl-play:hover { background: var(--accent) !important; }
+
         @media (max-width: 1024px) {
           .vinyl-grid { grid-template-columns: 1fr 360px !important; gap: 40px !important; }
         }
@@ -251,19 +311,4 @@ export default function VinylPlayer() {
       `}</style>
     </section>
   )
-}
-
-const ctrlStyle: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  cursor: 'pointer',
-  color: 'var(--muted)',
-  width: '34px',
-  height: '34px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '50%',
-  transition: 'all 0.2s',
-  fontSize: '15px',
 }
